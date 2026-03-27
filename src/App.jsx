@@ -6,6 +6,7 @@ import Lotes from "./pages/Lotes.jsx";
 import NovoLote from "./pages/NovoLote.jsx";
 import EditarLote from "./pages/EditarLote.jsx";
 import DetalheLote from "./pages/DetalheLote.jsx";
+import Compras from "./pages/Compras";
 
 export default function App() {
   return (
@@ -18,7 +19,8 @@ export default function App() {
           <Route path="/lotes/novo" element={<NovoLote />} />
             <Route path="/lotes/:id" element={<DetalheLote />} />
             <Route path="/lotes/:id/editar" element={<EditarLote />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/compras" element={<Compras />} />
         </Routes>
       </div>
     </>

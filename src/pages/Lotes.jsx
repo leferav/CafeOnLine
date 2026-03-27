@@ -57,7 +57,7 @@ export default function Lotes() {
                     </div>
                   </td>
                   <td>{lot.region || "-"}</td>
-                  <td>{lot.packaging?.type || "-"}{lot.packaging?.withGP ? " + GP" : ""}</td>
+                      <td>{lot.packaging?.type || "-"}</td>
                   <td>
                     <div className="muted" style={{ fontSize: 13 }}>
                       {lot.offer?.spot ? "Spot" : ""}
