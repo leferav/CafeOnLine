@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
-import { useI18n } from "../i18n/i18n";
-import { getLotById } from "../lib/storage";
+import { useI18n } from "../../../i18n/i18n.jsx";
+import { getLotById } from "../../../lib/storage.js";
 
 export default function DetalheLote() {
     const { id } = useParams();

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { useI18n } from "../i18n/i18n";
-import { loadLots, upsertLot } from "../lib/storage";
+import { useI18n } from "../../../i18n/i18n.jsx";
+import { loadLots, upsertLot } from "../../../lib/storage.js";
 
 function duplicateLot(lot) {
   const copy = {
