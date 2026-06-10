@@ -39,7 +39,7 @@ function mascaraCep(valor) {
         .replace(/(\d{5})(\d{1,3})$/, "$1-$2");
 }
 
-
+//teste
 
 export default function NovoCliente() {
     const navigate = useNavigate();
