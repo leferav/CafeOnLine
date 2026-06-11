@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.jsx";
+import Login from "./pages/Login.jsx";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 import Home from "./pages/Home.jsx";
 import Compras from "./pages/Compras";
@@ -30,19 +32,48 @@ export default function App() {
 
         <main className="page">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+            />
+            <Route path="/login" element={<Login />} />
 
             {/* Cadastros */}
-            <Route path="/cadastros" element={<Cadastros />} />
+            <Route
+                path="/cadastros"
+                element={
+                  <ProtectedRoute>
+                    <Cadastros />
+                  </ProtectedRoute>
+                }
+            />
 
             {/* Lotes */}
-            <Route path="/cadastros/lotes" element={<Lotes />} />
+            <Route
+                path="/cadastros/lotes"
+                element={
+                  <ProtectedRoute>
+                    <Lotes />
+                  </ProtectedRoute>
+                }
+            />
             <Route path="/cadastros/lotes/novo" element={<NovoLote />} />
             <Route path="/cadastros/lotes/:id" element={<DetalheLote />} />
             <Route path="/cadastros/lotes/:id/editar" element={<EditarLote />} />
 
             {/* Clientes */}
-            <Route path="/cadastros/clientes" element={<Clientes />} />
+            <Route
+                path="/cadastros/clientes"
+                element={
+                  <ProtectedRoute>
+                    <Clientes />
+                  </ProtectedRoute>
+                }
+            />
             <Route path="/cadastros/clientes/novo" element={<NovoCliente />} />
             <Route path="/cadastros/clientes/:id/editar" element={<EditarCliente />} />
 
@@ -54,7 +85,14 @@ export default function App() {
 
             {/* Vendas */}
             <Route path="/vendas" element={<Navigate to="/compras" replace />} />
-            <Route path="/compras" element={<Compras />} />
+            <Route
+                path="/compras"
+                element={
+                  <ProtectedRoute>
+                    <Compras />
+                  </ProtectedRoute>
+                }
+            />
 
             {/* Compatibilidade com links antigos */}
             <Route path="/lotes" element={<Navigate to="/cadastros/lotes" replace />} />

@@ -59,15 +59,20 @@ export default function NovoCliente() {
         numero: "",
         complemento: "",
         bairro: "",
+
         tipoCliente: "Comprador",
+        grupoAcesso: "consulta",
+
         moedaPreferencial: "BRL",
         idiomaPreferencial: "Português",
         limiteCredito: "",
+
         nomeContato: "",
         cargoContato: "",
         telefoneContato: "",
         emailContato: "",
         observacoes: "",
+        ativoPortal: false,
     });
 
     function alterarCampo(campo, valor) {
@@ -373,6 +378,31 @@ export default function NovoCliente() {
                             <option>Espanhol</option>
                         </select>
                     </label>
+
+                    <label>
+                        Grupo de acesso
+                        <select
+                            value={cliente.grupoAcesso}
+                            onChange={(e) => alterarCampo("grupoAcesso", e.target.value)}
+                        >
+                            <option value="consulta">Consulta</option>
+                            <option value="comprador">Comprador</option>
+                            <option value="comercial">Comercial</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={cliente.ativoPortal}
+                            onChange={(e) =>
+                                alterarCampo("ativoPortal", e.target.checked)
+                            }
+                        />
+                        Permitir acesso ao portal
+                    </label>
+
                 </div>
             </div>
 

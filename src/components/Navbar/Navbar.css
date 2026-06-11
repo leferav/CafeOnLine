@@ -88,3 +88,34 @@
     width: 100%;
   }
 }
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-name {
+  color: #5a321d;
+  font-weight: 600;
+}
+
+.btn-logout {
+  background: #6f3b3b;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-logout:hover {
+  background: #9b2c2c;
+}

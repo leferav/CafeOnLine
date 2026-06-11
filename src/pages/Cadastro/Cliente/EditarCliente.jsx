@@ -56,7 +56,11 @@ export default function EditarCliente() {
             return;
         }
 
-        setCliente(clienteEncontrado);
+        setCliente({
+            grupoAcesso: "consulta",
+            ativoPortal: false,
+            ...clienteEncontrado,
+        });
     }, [id, navigate]);
 
     function alterarCampo(campo, valor) {
@@ -317,12 +321,28 @@ export default function EditarCliente() {
                     </label>
 
                     <label>
-                        Limite de crédito
+                        Grupo de acesso
+                        <select
+                            value={cliente.grupoAcesso || "consulta"}
+                            onChange={(e) =>
+                                alterarCampo("grupoAcesso", e.target.value)
+                            }
+                        >
+                            <option value="consulta">Consulta</option>
+                            <option value="comprador">Comprador</option>
+                            <option value="comercial">Comercial</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </label>
+                    <label className="checkbox-field">
                         <input
-                            type="number"
-                            value={cliente.limiteCredito}
-                            onChange={(e) => alterarCampo("limiteCredito", e.target.value)}
+                            type="checkbox"
+                            checked={cliente.ativoPortal || false}
+                            onChange={(e) =>
+                                alterarCampo("ativoPortal", e.target.checked)
+                            }
                         />
+                        Permitir acesso ao portal
                     </label>
                 </div>
             </div>
