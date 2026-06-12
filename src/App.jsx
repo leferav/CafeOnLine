@@ -5,102 +5,127 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 
 import Home from "./pages/Home.jsx";
 import Compras from "./pages/Compras";
-
-// Tela principal de Cadastros
 import Cadastros from "./pages/Cadastro/Cadastros.jsx";
 
-// Lotes
 import Lotes from "./pages/Cadastro/Lote/Lotes.jsx";
 import NovoLote from "./pages/Cadastro/Lote/NovoLote.jsx";
 import EditarLote from "./pages/Cadastro/Lote/EditarLote.jsx";
 import DetalheLote from "./pages/Cadastro/Lote/DetalheLote.jsx";
 
-// Outros cadastros
 import Clientes from "./pages/Cadastro/Cliente/Clientes.jsx";
 import NovoCliente from "./pages/Cadastro/Cliente/NovoCliente.jsx";
 import EditarCliente from "./pages/Cadastro/Cliente/EditarCliente.jsx";
 
-// import Origens from "./pages/Cadastro/Origem/Origens.jsx";
-// import Variedades from "./pages/Cadastro/Variedade/Variedades.jsx";
-// import Safras from "./pages/Cadastro/Safra/Safras.jsx";
-// import Fornecedores from "./pages/Cadastro/Fornecedor/Fornecedores.jsx";
+function LayoutProtegido({ children }) {
+  return (
+    <ProtectedRoute>
+      <Navbar />
+      <main className="page">{children}</main>
+    </ProtectedRoute>
+  );
+}
 
 export default function App() {
   return (
-      <>
-        <Navbar />
+    <Routes>
+      <Route path="/login" element={<Login />} />
 
-        <main className="page">
-          <Routes>
-            <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Home />
-                  </ProtectedRoute>
-                }
-            />
-            <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <LayoutProtegido>
+            <Home />
+          </LayoutProtegido>
+        }
+      />
 
-            {/* Cadastros */}
-            <Route
-                path="/cadastros"
-                element={
-                  <ProtectedRoute>
-                    <Cadastros />
-                  </ProtectedRoute>
-                }
-            />
+      <Route
+        path="/cadastros"
+        element={
+          <LayoutProtegido>
+            <Cadastros />
+          </LayoutProtegido>
+        }
+      />
 
-            {/* Lotes */}
-            <Route
-                path="/cadastros/lotes"
-                element={
-                  <ProtectedRoute>
-                    <Lotes />
-                  </ProtectedRoute>
-                }
-            />
-            <Route path="/cadastros/lotes/novo" element={<NovoLote />} />
-            <Route path="/cadastros/lotes/:id" element={<DetalheLote />} />
-            <Route path="/cadastros/lotes/:id/editar" element={<EditarLote />} />
+      <Route
+        path="/cadastros/lotes"
+        element={
+          <LayoutProtegido>
+            <Lotes />
+          </LayoutProtegido>
+        }
+      />
 
-            {/* Clientes */}
-            <Route
-                path="/cadastros/clientes"
-                element={
-                  <ProtectedRoute>
-                    <Clientes />
-                  </ProtectedRoute>
-                }
-            />
-            <Route path="/cadastros/clientes/novo" element={<NovoCliente />} />
-            <Route path="/cadastros/clientes/:id/editar" element={<EditarCliente />} />
+      <Route
+        path="/cadastros/lotes/novo"
+        element={
+          <LayoutProtegido>
+            <NovoLote />
+          </LayoutProtegido>
+        }
+      />
 
-            {/* Futuros */}
-            {/* <Route path="/cadastros/origens" element={<Origens />} /> */}
-            {/* <Route path="/cadastros/variedades" element={<Variedades />} /> */}
-            {/* <Route path="/cadastros/safras" element={<Safras />} /> */}
-            {/* <Route path="/cadastros/fornecedores" element={<Fornecedores />} /> */}
+      <Route
+        path="/cadastros/lotes/:id"
+        element={
+          <LayoutProtegido>
+            <DetalheLote />
+          </LayoutProtegido>
+        }
+      />
 
-            {/* Vendas */}
-            <Route path="/vendas" element={<Navigate to="/compras" replace />} />
-            <Route
-                path="/compras"
-                element={
-                  <ProtectedRoute>
-                    <Compras />
-                  </ProtectedRoute>
-                }
-            />
+      <Route
+        path="/cadastros/lotes/:id/editar"
+        element={
+          <LayoutProtegido>
+            <EditarLote />
+          </LayoutProtegido>
+        }
+      />
 
-            {/* Compatibilidade com links antigos */}
-            <Route path="/lotes" element={<Navigate to="/cadastros/lotes" replace />} />
-            <Route path="/lotes/novo" element={<Navigate to="/cadastros/lotes/novo" replace />} />
+      <Route
+        path="/cadastros/clientes"
+        element={
+          <LayoutProtegido>
+            <Clientes />
+          </LayoutProtegido>
+        }
+      />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </>
+      <Route
+        path="/cadastros/clientes/novo"
+        element={
+          <LayoutProtegido>
+            <NovoCliente />
+          </LayoutProtegido>
+        }
+      />
+
+      <Route
+        path="/cadastros/clientes/:id/editar"
+        element={
+          <LayoutProtegido>
+            <EditarCliente />
+          </LayoutProtegido>
+        }
+      />
+
+      <Route path="/vendas" element={<Navigate to="/compras" replace />} />
+
+      <Route
+        path="/compras"
+        element={
+          <LayoutProtegido>
+            <Compras />
+          </LayoutProtegido>
+        }
+      />
+
+      <Route path="/lotes" element={<Navigate to="/cadastros/lotes" replace />} />
+      <Route path="/lotes/novo" element={<Navigate to="/cadastros/lotes/novo" replace />} />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

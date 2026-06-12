@@ -2,22 +2,22 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./Login.css";
-import { useEffect } from "react";
+import backgroundImage from "../assets/images/FundoLogin.png";
 
 export default function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const [email, setEmail] = useState("");
-    const [documento, setDocumento] = useState("");
+    const [email, setEmail] = useState("comercial@cafeonline.com");
+    const [senha, setSenha] = useState("cafe2026");
 
     function handleSubmit(e) {
         e.preventDefault();
 
-        const sucesso = login(email, documento);
+        const sucesso = login(email, senha);
 
         if (!sucesso) {
-            alert("E-mail/documento inválido ou cliente sem acesso ao portal.");
+            alert("E-mail ou senha inválidos.");
             return;
         }
 
@@ -25,12 +25,17 @@ export default function Login() {
     }
 
     return (
-        <main className="login-page">
+        <main
+            className="login-page"
+            style={{
+                backgroundImage: `url(${backgroundImage})`
+            }}
+        >
             <section className="login-card">
                 <div className="login-logo">☕</div>
 
                 <h1>Café On-line</h1>
-                <p>Acesse o painel comercial</p>
+                <p>Portal comercial para gestão de compras e lotes de café</p>
 
                 <form onSubmit={handleSubmit}>
                     <label>
@@ -44,14 +49,18 @@ export default function Login() {
                     </label>
 
                     <label>
-                        CPF/CNPJ
+                        Senha
                         <input
-                            type="text"
-                            value={documento}
-                            onChange={(e) => setDocumento(e.target.value)}
-                            placeholder="Digite exatamente como cadastrado"
+                            type="password"
+                            value={senha}
+                            onChange={(e) => setSenha(e.target.value)}
+                            placeholder="Digite sua senha"
                         />
                     </label>
+
+                    <div className="login-links">
+                        <a href="#">Esqueci minha senha</a>
+                    </div>
 
                     <button type="submit">Entrar</button>
                 </form>

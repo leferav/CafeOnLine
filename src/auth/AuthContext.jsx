@@ -1,50 +1,40 @@
 import { createContext, useContext, useState } from "react";
-import { listarClientes } from "../pages/Cadastro/Cliente/clientesStorage";
 
 const AuthContext = createContext();
 
+const USUARIO_TESTE = {
+    email: "comercial@cafeonline.com",
+    senha: "cafe2026"
+};
+
 export function AuthProvider({ children }) {
-    const [usuario, setUsuario] = useState(() => {
-        const dados = localStorage.getItem("cafe_online_usuario");
-        return dados ? JSON.parse(dados) : null;
-    });
+    const [authenticated, setAuthenticated] = useState(
+        sessionStorage.getItem("auth")
+    );
 
-    function login(email, documento) {
-        const clientes = listarClientes();
-
-        const cliente = clientes.find(
-            (c) =>
-                c.email?.toLowerCase() === email.toLowerCase() &&
-                c.documento === documento &&
-                c.ativoPortal === true
-        );
-
-        if (!cliente) {
-            return false;
-        }
-
-        const usuarioLogado = {
-            id: cliente.id,
-            nome: cliente.nomeRazaoSocial,
-            email: cliente.email,
-            grupoAcesso: cliente.grupoAcesso || "consulta",
-        };
-
-        localStorage.setItem("cafe_online_usuario", JSON.stringify(usuarioLogado));
-        setUsuario(usuarioLogado);
-
+function login(email, senha) {
+    if (email === "comercial@cafeonline.com" && senha === "cafe2026") {
+        sessionStorage.setItem("auth", "true");
+        setAuthenticated(true);
         return true;
     }
 
-    function logout() {
-        localStorage.removeItem("cafe_online_usuario");
-        setUsuario(null);
+    return false;
+}
 
-        window.location.href = "/login";
+    function logout() {
+        localStorage.removeItem("auth");
+        setAuthenticated(false);
     }
 
     return (
-        <AuthContext.Provider value={{ usuario, login, logout }}>
+        <AuthContext.Provider
+            value={{
+                authenticated,
+                login,
+                logout
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
