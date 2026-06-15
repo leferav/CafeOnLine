@@ -1,185 +1,174 @@
-# ☕ Cafe Online
+# ☕ Café Online
 
-Aplicação web desenvolvida com **React + Vite**, utilizando componentes
-em **JavaScript (JSX)**.
+Plataforma web para comercialização de café entre produtores, compradores e equipe comercial.
 
-O projeto foi estruturado para evoluir gradualmente para uma arquitetura
-em nuvem utilizando **Microsoft Azure**, permitindo crescimento
-organizado e escalável.
+## Objetivo
 
-------------------------------------------------------------------------
+O Café Online é uma plataforma voltada para a comercialização de café entre produtores, compradores e equipe comercial.
+
+O sistema permite o cadastro e negociação de lotes de café, facilitando a conexão entre produtores rurais e compradores nacionais e internacionais.
+
+O projeto foi concebido para crescer de forma modular, permitindo futuras integrações com logística, exportação, documentos, câmbio e rastreabilidade dos lotes.
+
+---
 
 # 📦 Estrutura do Repositório
 
     cafe-online
     │
-    ├── frontend            # Aplicação React (biblioteca do Java)
-    │
-    ├── backend             # API futura (Node.js ou .Net)
-    │
-    ├── database            # Scripts e estrutura do banco (postgree)
-    │
+    ├── frontend            # Aplicação React + Vite
+    ├── backend             # API .NET 8 Web API
+    ├── database            # Scripts e estrutura do banco PostgreSQL
     ├── docs                # Documentação do projeto
-    │
-    ├── .github/workflows   # CI/CD (deploy automático)
-    │
+    ├── .github/workflows   # CI/CD
     └── README.md
 
-------------------------------------------------------------------------
-
-# 🧩 Estrutura do Frontend
-
-    src
-    ├── components      # Componentes reutilizáveis
-    ├── i18n            # Internacionalização
-    ├── lib             # Funções utilitárias
-    ├── pages           # Páginas da aplicação
-    │
-    ├── App.jsx         # Configuração das rotas
-    ├── main.jsx        # Inicialização do React
-    └── index.css       # Estilos globais
-
-Fluxo da aplicação:
-
-    index.html
-       │
-       ▼
-    main.jsx → Inicializa o React
-       │
-       ▼
-    App.jsx → Configuração das rotas
-       │
-       ▼
-    pages / components
-
-------------------------------------------------------------------------
+---
 
 # 🚀 Tecnologias Utilizadas
 
--   React
--   Vite (para rodar o projeto)
--   React Router
--   JavaScript (JSX)
--   CSS (arquivo de estilo, formatações, designer...)
+## Frontend
+- React
+- Vite
+- React Router DOM
+- JavaScript (ES6+)
+- CSS
 
-------------------------------------------------------------------------
+## Backend
+- .NET 8 Web API
+- Entity Framework Core
+- JWT Authentication (futuro)
 
-# ⚙️ Executando o Projeto
+## Banco de Dados
+- PostgreSQL
 
-Instalar dependências:
+## Cloud
+- Azure Static Web Apps
+- Azure Container Apps
+- Azure Database for PostgreSQL
 
-``` bash
-npm install
-```
+---
 
-Executar em modo desenvolvimento:
+# 🔐 Controle de Acesso
 
-``` bash
-npm run dev
-```
+O sistema utiliza controle de acesso baseado em perfis de usuário.
 
-Aplicação disponível em:
+## Perfis Disponíveis
 
-    http://localhost:5173
+### Administrador
+Login: admin@cafeonline.com
 
-------------------------------------------------------------------------
+Permissões:
+- Dashboard
+- Cadastros
+- Usuários
+- Produtores
+- Compradores
+- Lotes
+- Compras
+- Vendas
+- Relatórios
+- Configurações
 
-# 📦 Build de Produção (vou cirar uma ambiente de Homologação e um Produção)
+### Produtor
+Login: produtor@cafeonline.com
 
-Gerar build otimizado:
+Permissões:
+- Dashboard
+- Cadastros
+- Meus Lotes
+- Cadastrar Lote
+- Minhas Vendas
+- Documentos
+- Meu Perfil
 
-``` bash
-npm run build
-```
+### Comercial
+Login: comercial@cafeonline.com
 
-Os arquivos serão gerados em:
+Permissões:
+- Dashboard Comercial
+- Clientes
+- Lotes Disponíveis
+- Negociações
+- Vendas
 
-    dist/
+### Comprador
+Login: comprador@cafeonline.com
 
-------------------------------------------------------------------------
+Permissões:
+- Dashboard
+- Comprar Café
+- Catálogo de Lotes
+- Meus Pedidos
+- Documentos
+- Meu Perfil
 
-# ☁️ Arquitetura na Nuvem (Azure)
+---
 
-O projeto foi planejado para evoluir em etapas dentro da **Microsoft
-Azure**.
+## Matriz de Permissões
 
-------------------------------------------------------------------------
+| Perfil | Cadastros | Lotes | Compras | Vendas | Configurações |
+|---------|---------|---------|---------|---------|---------|
+| Administrador | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Produtor | ✅ | ✅ | ❌ | ✅ | ❌ |
+| Comercial | ❌ | Visualizar | ❌ | ✅ | ❌ |
+| Comprador | ❌ | Visualizar | ✅ | ❌ | ❌ |
 
-# Fase 1 --- Frontend
+---
 
-Publicação do **React + Vite** no **Azure Static Web Apps**.
+## Regras de Navegação
 
-Arquitetura:
+A aba **Cadastros** é exibida apenas para:
+- Administrador
+- Produtor
 
-    Usuário (navegador ou celular)
-       │
-       ▼
-    Azure Static Web Apps
+Sem acesso:
+- Comercial
+- Comprador
 
-Vantagens:
+---
 
--   Hospedagem gratuita para projetos pequenos
--   Deploy automático via Git
-------------------------------------------------------------------------
+## Usuários de Teste
 
-# Fase 2 --- Frontend + API
+| Perfil | Login |
+|---------|---------|
+| Administrador | admin@cafeonline.com |
+| Produtor | produtor@cafeonline.com |
+| Comercial | comercial@cafeonline.com |
+| Comprador | comprador@cafeonline.com |
 
-Quando o sistema precisar de backend (cadastro, autenticação, regras de
-negócio), será adicionada uma API.
+Senha padrão:
 
-Arquitetura:
+    cafe2026
 
-    Usuário
-       │
-       ▼
-    Azure Static Web Apps (Frontend)
-       │
-       ▼
-    API (Azure App Service ouuuuuuuuu Container Apps (estou pensando mais netes))
+> Estes usuários existem apenas para testes durante o desenvolvimento. Em produção os usuários serão cadastrados e gerenciados pelo Administrador.
 
-Backend possível:
+---
 
--   Node.js ouuuuu  .NET
+# ☁️ Arquitetura Azure
 
-------------------------------------------------------------------------
+## Fase 1
+- Frontend em Azure Static Web Apps
 
-# Fase 3 --- Sistema Completo
+## Fase 2
+- Frontend + API .NET 8 em Azure Container Apps
 
-Com o crescimento da aplicação, será incluído banco de dados e
-integrações.
+## Fase 3
+- PostgreSQL
+- Monitoramento
+- CI/CD
+- Integrações externas
 
-Arquitetura recomendada:
+---
 
-    Usuário
-       │
-       ▼
-    Azure Static Web Apps (Frontend)
-       │
-       ▼
-    API (Azure App Service / Container Apps)
-       │
-       ▼
-    Banco de Dados
-    ├─ PostgreSQL
+# 📈 Evoluções Futuras
 
-Possíveis evoluções:
-
--   Autenticação
--   Upload de arquivos (estara preparado...)
--   Integração com APIs externas (talvez futuramente será preciso, como ver o cotação do dolar....)
--   Monitoramento e logs (muito importante para verificar erros de produção, ainda mais quando não e possivel simular no Homologação)
--   CI/CD automático (integrar (alteração) e entregar ou seja, subir uma alteração automaticamente...)
-
-------------------------------------------------------------------------
-
-# 📈 Evolução do Projeto
-
-Caminho recomendado de evolução:
-
-1.  Publicar apenas o **frontend**
-2.  Criar **API separada**
-3.  Integrar **banco de dados**
-4.  Automatizar **deploy e infraestrutura**
-
-Essa estratégia permite que o projeto cresça de forma organizada e
-escalável.
+- Cadastro dinâmico de usuários
+- Recuperação de senha
+- Autenticação JWT
+- Controle granular de permissões
+- Auditoria de acessos
+- Perfis de Corretor
+- Perfis de Exportador
+- Perfis de Cooperativa
+- Perfis de Classificador de Café
