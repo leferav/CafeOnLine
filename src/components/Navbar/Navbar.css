@@ -315,11 +315,12 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(38, 26, 18, 0.3);
+    background: rgba(20, 14, 10, 0.58);
     opacity: 0;
     pointer-events: none;
     transition: 0.2s ease;
     z-index: 30;
+    backdrop-filter: blur(2px);
   }
 
   .drawer-overlay.open {
@@ -334,9 +335,12 @@
     bottom: 0;
     left: 0;
     width: min(330px, 88vw);
-    background: #fffaf6;
+    background: linear-gradient(180deg, #fffaf6 0%, #fff6ef 100%);
     border-right: 1px solid #eadfd5;
-    box-shadow: 18px 0 50px rgba(48, 31, 18, 0.18);
+    box-shadow: 18px 0 60px rgba(20, 14, 10, 0.35);
+    opacity: 1;
+    isolation: isolate;
+    overflow-y: auto;
     z-index: 31;
     transform: translateX(-105%);
     transition: 0.22s ease;
@@ -403,6 +407,7 @@
     color: #4b4037;
     font-weight: 800;
     border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.72);
   }
 
   .drawer-links a span {
@@ -418,6 +423,7 @@
   .drawer-links a.active {
     color: #fff;
     background: #5a3e2b;
+    box-shadow: 0 12px 24px rgba(90, 62, 43, 0.2);
   }
 
   .drawer-links a.active span {
@@ -432,6 +438,7 @@
     background: #7f3d3f;
     color: #fff;
     font-weight: 800;
+    box-shadow: 0 10px 24px rgba(127, 61, 63, 0.22);
   }
 
   .bottom-nav {
