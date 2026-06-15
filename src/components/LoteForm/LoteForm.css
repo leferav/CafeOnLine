@@ -139,3 +139,24 @@
         flex-direction: column;
     }
 }
+
+@media (max-width: 640px) {
+    .lot-form-header h1 {
+        font-size: 24px;
+    }
+
+    .lot-form-actions,
+    .lot-form-actions .btn,
+    .lot-form-actions .btn-link {
+        width: 100%;
+    }
+
+    .card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .summary-value {
+        font-size: 23px;
+    }
+}

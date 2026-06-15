@@ -134,3 +134,39 @@
     background: #a83232;
     border-color: #a83232;
 }
+@media (max-width: 640px) {
+    .cadastros-page {
+        padding: 18px 0 36px;
+    }
+
+    .cadastros-hero {
+        padding: 18px;
+        border-radius: 18px;
+        margin-bottom: 18px;
+    }
+
+    .cadastros-hero h1 {
+        font-size: 26px;
+    }
+
+    .cadastros-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .cadastro-card {
+        min-height: auto;
+        padding: 18px;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        width: 100%;
+        min-height: 40px;
+    }
+}

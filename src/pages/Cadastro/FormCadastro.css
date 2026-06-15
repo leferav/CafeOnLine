@@ -93,3 +93,29 @@ textarea {
 .checkbox-field input {
     width: auto;
 }
+@media (max-width: 640px) {
+    .page-header {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .page-header h1 {
+        font-size: 26px;
+    }
+
+    .actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .form-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+}

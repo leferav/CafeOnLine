@@ -208,3 +208,111 @@ td {
         margin: 0;
         color: #675b52;
     }
+
+/* Ajustes responsivos para celular */
+@media (max-width: 900px) {
+  .hero-panel,
+  .dashboard-columns,
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .page {
+    width: 100%;
+    padding: 18px 14px 36px;
+  }
+
+  .card,
+  .hero-panel,
+  .quick-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .hero-panel {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .hero-panel h1 {
+    font-size: 26px;
+  }
+
+  .hero-panel p,
+  .section-header p,
+  .muted {
+    font-size: 15px;
+  }
+
+  .hero-stat-card strong {
+    font-size: 24px;
+  }
+
+  .quick-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .quick-card {
+    min-height: auto;
+    gap: 14px;
+  }
+
+  .quick-card h3 {
+    font-size: 22px;
+  }
+
+  .quick-card p {
+    font-size: 15px;
+  }
+
+  .btn-link,
+  button.btn-link,
+  a.btn-link {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  table {
+    min-width: 760px;
+  }
+
+  th,
+  td {
+    padding: 9px 8px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .hero-panel h1 {
+    font-size: 24px;
+  }
+
+  .quick-card h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .purchase-item-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .purchase-item-grid > div:last-child {
+    align-self: stretch !important;
+  }
+}
