@@ -3,8 +3,8 @@
   border-bottom: 1px solid #eadfd5;
   position: sticky;
   top: 0;
-  z-index: 20;
-  backdrop-filter: blur(10px);
+  z-index: 1000;
+  backdrop-filter: blur(12px);
 }
 
 .navbar {
@@ -319,7 +319,7 @@
     opacity: 0;
     pointer-events: none;
     transition: 0.2s ease;
-    z-index: 30;
+    z-index: 1001;
     backdrop-filter: blur(2px);
   }
 
@@ -334,14 +334,17 @@
     top: 0;
     bottom: 0;
     left: 0;
-    width: min(330px, 88vw);
-    background: linear-gradient(180deg, #fffaf6 0%, #fff6ef 100%);
+    width: min(330px, 78vw);
+    background: linear-gradient(180deg, rgba(255, 250, 246, 0.98) 0%, rgba(255, 246, 239, 0.98) 100%);
     border-right: 1px solid #eadfd5;
-    box-shadow: 18px 0 60px rgba(20, 14, 10, 0.35);
+    box-shadow: 16px 0 50px rgba(20, 14, 10, 0.30);
     opacity: 1;
     isolation: isolate;
     overflow-y: auto;
-    z-index: 31;
+    overscroll-behavior: contain;
+    z-index: 1002;
+    height: 100dvh;
+    max-height: 100dvh;
     transform: translateX(-105%);
     transition: 0.22s ease;
     padding: 20px;
@@ -528,5 +531,12 @@
   .mobile-user-card {
     align-items: stretch;
     display: grid;
+  }
+}
+
+@media (max-width: 390px) {
+  .mobile-drawer {
+    width: min(318px, 82vw);
+    padding: 18px;
   }
 }
