@@ -1,24 +1,35 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useI18n } from "../../../i18n/i18n.jsx";
+import { useAuth } from "../../../auth/AuthContext";
+import { PERMISSOES } from "../../../auth/AuthContext";
+import {
+  obterContextoLotes,
+  obterRotasLotes,
+  ROTAS_LOTES,
+} from "../../../auth/routes";
 import { getLotById } from "../../../lib/storage.js";
 
 export default function DetalheLote() {
     const { id } = useParams();
+    const location = useLocation();
+    const { temPermissao } = useAuth();
     const { t, lang } = useI18n();
+    const rotas = obterRotasLotes(location.pathname);
+    const isCompra = obterContextoLotes(location.pathname) === "compra";
     const lot = getLotById(id);
 
     if (!lot) {
         return (
             <div className="card">
-                <p className="muted">Lote não encontrado.</p>
-                <Link className="btn-link" to="/lotes">← {t("lots")}</Link>
+                <p className="muted">{t("detalheLote.notFound")}</p>
+                <Link className="btn-link" to={rotas.lista}>← {t("lots")}</Link>
             </div>
         );
     }
 
     const salesModeLabel = lot.offer?.salesMode === "container"
-        ? "Contêiner"
-        : "Saca";
+        ? t("detalheLote.container")
+        : t("detalheLote.sack");
 
     const currency = lot.offer?.currency || "USD";
     const pricePerSack = Number(lot.offer?.pricePerSack || 0);
@@ -28,6 +39,9 @@ export default function DetalheLote() {
             : lang === "es"
                 ? (lot.description?.es || lot.description?.pt || "")
                 : (lot.description?.pt || "");
+
+    const podeEditar = !isCompra && temPermissao(PERMISSOES.NOVO_LOTE);
+    const podeComprar = temPermissao(PERMISSOES.COMPRAS);
 
     return (
         <div style={{ display: "grid", gap: 16 }}>
@@ -39,13 +53,20 @@ export default function DetalheLote() {
                     </div>
 
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                        <Link className="btn-link" to={`/compras?lotId=${lot.id}`}>
-                            Comprar este lote
-                        </Link>
-                        <Link className="btn-link" to={`/lotes/${lot.id}/editar`}>
-                            {t("edit")}
-                        </Link>
-                        <Link className="btn-link" to="/lotes">
+                        {podeComprar && (
+                            <Link className="btn-link" to={`/compras?lotId=${lot.id}`}>
+                                {t("detalheLote.buyLot")}
+                            </Link>
+                        )}
+                        {podeEditar && (
+                            <Link
+                                className="btn-link"
+                                to={ROTAS_LOTES.cadastro.editar(lot.id)}
+                            >
+                                {t("edit")}
+                            </Link>
+                        )}
+                        <Link className="btn-link" to={rotas.lista}>
                             ← {t("lots")}
                         </Link>
                     </div>
@@ -53,7 +74,7 @@ export default function DetalheLote() {
             </div>
 
             <div className="card">
-                <h3 style={{ marginTop: 0 }}>Resumo comercial</h3>
+                <h3 style={{ marginTop: 0 }}>{t("detalheLote.commercialSummary")}</h3>
 
                 <div
                     style={{
@@ -64,34 +85,34 @@ export default function DetalheLote() {
                     }}
                 >
                     <div>
-                        <strong>Região:</strong> {lot.region || "-"}<br />
-                        <strong>Armazém origem:</strong> {lot.originWarehouse || "-"}<br />
-                        <strong>Armazém disponível:</strong> {lot.availableWarehouse || "-"}
+                        <strong>{t("detalheLote.region")}:</strong> {lot.region || "-"}<br />
+                        <strong>{t("detalheLote.originWarehouse")}:</strong> {lot.originWarehouse || "-"}<br />
+                        <strong>{t("detalheLote.availableWarehouse")}:</strong> {lot.availableWarehouse || "-"}
                     </div>
 
                     <div>
-                        <strong>Embalagem:</strong> {lot.packaging?.type || "-"}<br />
-                        <strong>Venda por:</strong> {salesModeLabel}<br />
-                        <strong>Embarque:</strong> {lot.offer?.ship?.shipMonth || "-"}
+                        <strong>{t("detalheLote.packaging")}:</strong> {lot.packaging?.type || "-"}<br />
+                        <strong>{t("detalheLote.salesBy")}:</strong> {salesModeLabel}<br />
+                        <strong>{t("detalheLote.shipping")}:</strong> {lot.offer?.ship?.shipMonth || "-"}
                     </div>
 
                     <div>
-                        <strong>Quantidade mínima:</strong> {lot.offer?.quantityMin || "-"}<br />
-                        <strong>Quantidade disponível:</strong> {lot.offer?.quantityAvailable || "-"}<br />
-                        <strong>Preço por saca:</strong> {currency} {pricePerSack.toFixed(2)}
+                        <strong>{t("detalheLote.minQty")}:</strong> {lot.offer?.quantityMin || "-"}<br />
+                        <strong>{t("detalheLote.availableQty")}:</strong> {lot.offer?.quantityAvailable || "-"}<br />
+                        <strong>{t("detalheLote.pricePerSack")}:</strong> {currency} {pricePerSack.toFixed(2)}
                     </div>
 
                     <div>
-                        <strong>Nota SCA:</strong> {Number(lot.sca?.totalScore || 0).toFixed(1)}<br />
-                        <strong>Origem:</strong> Brasil
+                        <strong>{t("detalheLote.scaScore")}:</strong> {Number(lot.sca?.totalScore || 0).toFixed(1)}<br />
+                        <strong>{t("detalheLote.originCountry")}:</strong> {t("detalheLote.brazil")}
                     </div>
                 </div>
             </div>
 
             <div className="card">
-                <h3 style={{ marginTop: 0 }}>Descrição</h3>
+                <h3 style={{ marginTop: 0 }}>{t("detalheLote.description")}</h3>
                 <p style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
-                    {description || "Sem descrição cadastrada."}
+                    {description || t("detalheLote.noDescription")}
                 </p>
             </div>
         </div>

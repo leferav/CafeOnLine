@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { obterPrimeiraRotaAcessivel } from "./routes";
 
 export default function ProtectedRoute({ children, permissao }) {
   const { authenticated, temPermissao } = useAuth();
@@ -9,7 +10,8 @@ export default function ProtectedRoute({ children, permissao }) {
   }
 
   if (permissao && !temPermissao(permissao)) {
-    return <Navigate to="/" replace />;
+    const destino = obterPrimeiraRotaAcessivel(temPermissao);
+    return <Navigate to={destino} replace />;
   }
 
   return children;

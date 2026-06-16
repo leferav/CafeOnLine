@@ -42,6 +42,7 @@ const USUARIOS_TESTE = [
       PERMISSOES.CLIENTES,
       PERMISSOES.LOTES,
       PERMISSOES.VENDAS,
+      PERMISSOES.NEGOCIACOES,
     ],
   },
   {
@@ -53,6 +54,7 @@ const USUARIOS_TESTE = [
       PERMISSOES.DASHBOARD,
       PERMISSOES.LOTES,
       PERMISSOES.COMPRAS,
+      PERMISSOES.NEGOCIACOES,
       PERMISSOES.DOCUMENTOS,
       PERMISSOES.PERFIL,
     ],
@@ -68,6 +70,7 @@ const USUARIOS_TESTE = [
       PERMISSOES.LOTES,
       PERMISSOES.NOVO_LOTE,
       PERMISSOES.VENDAS,
+      PERMISSOES.NEGOCIACOES,
       PERMISSOES.DOCUMENTOS,
       PERMISSOES.PERFIL,
     ],
@@ -98,7 +101,7 @@ export function AuthProvider({ children }) {
         u.senha === senha
     );
 
-    if (!usuarioEncontrado) return false;
+    if (!usuarioEncontrado) return null;
 
     const usuarioSessao = {
       nome: usuarioEncontrado.nome,
@@ -111,7 +114,7 @@ export function AuthProvider({ children }) {
     sessionStorage.setItem("usuario", JSON.stringify(usuarioSessao));
     setUsuario(usuarioSessao);
 
-    return true;
+    return usuarioSessao;
   }
 
   function logout() {

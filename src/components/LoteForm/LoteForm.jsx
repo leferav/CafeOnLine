@@ -4,6 +4,7 @@ import "./LoteForm.css";
 
 import { useI18n } from "../../i18n/i18n";
 import { getLotById, upsertLot } from "../../lib/storage";
+import { ROTAS_LOTES } from "../../auth/routes";
 
 const REGIONS = [
     "Cerrado Mineiro",
@@ -121,16 +122,16 @@ export default function LoteForm({ mode = "create", lotId }) {
     function validate() {
         const nextErrors = {};
 
-        if (isEmpty(lot.internalCode)) nextErrors.internalCode = "Informe o código interno.";
-        if (isEmpty(lot.lotName)) nextErrors.lotName = "Informe o nome do lote.";
-        if (isEmpty(lot.region)) nextErrors.region = "Selecione a região.";
-        if (isEmpty(lot.originWarehouse)) nextErrors.originWarehouse = "Informe o armazém de origem.";
-        if (isEmpty(lot.availableWarehouse)) nextErrors.availableWarehouse = "Informe o armazém disponível.";
-        if (isEmpty(lot.packaging?.type)) nextErrors.packagingType = "Selecione a embalagem.";
-        if (isEmpty(lot.offer?.quantityMin)) nextErrors.quantityMin = "Informe a quantidade mínima.";
-        if (isEmpty(lot.offer?.quantityAvailable)) nextErrors.quantityAvailable = "Informe a quantidade disponível.";
-        if (isEmpty(lot.offer?.pricePerSack)) nextErrors.pricePerSack = "Informe o preço por saca.";
-        if (isEmpty(lot.offer?.ship?.shipMonth)) nextErrors.shipMonth = "Selecione o mês de embarque.";
+        if (isEmpty(lot.internalCode)) nextErrors.internalCode = t("loteForm.errInternalCode");
+        if (isEmpty(lot.lotName)) nextErrors.lotName = t("loteForm.errLotName");
+        if (isEmpty(lot.region)) nextErrors.region = t("loteForm.errRegion");
+        if (isEmpty(lot.originWarehouse)) nextErrors.originWarehouse = t("loteForm.errOriginWarehouse");
+        if (isEmpty(lot.availableWarehouse)) nextErrors.availableWarehouse = t("loteForm.errAvailableWarehouse");
+        if (isEmpty(lot.packaging?.type)) nextErrors.packagingType = t("loteForm.errPackaging");
+        if (isEmpty(lot.offer?.quantityMin)) nextErrors.quantityMin = t("loteForm.errQuantityMin");
+        if (isEmpty(lot.offer?.quantityAvailable)) nextErrors.quantityAvailable = t("loteForm.errQuantityAvailable");
+        if (isEmpty(lot.offer?.pricePerSack)) nextErrors.pricePerSack = t("loteForm.errPricePerSack");
+        if (isEmpty(lot.offer?.ship?.shipMonth)) nextErrors.shipMonth = t("loteForm.errShipMonth");
 
         setErrors(nextErrors);
         return Object.keys(nextErrors).length === 0;
@@ -155,10 +156,10 @@ export default function LoteForm({ mode = "create", lotId }) {
         };
 
         upsertLot(payload);
-        setToast("Lote salvo com sucesso.");
+        setToast(t("lotSaved"));
 
         setTimeout(() => {
-            navigate(`/lotes/${payload.id}`);
+            navigate(ROTAS_LOTES.cadastro.detalhe(payload.id));
         }, 500);
     }
 
@@ -166,14 +167,18 @@ export default function LoteForm({ mode = "create", lotId }) {
         <div className="lot-form-page">
             <div className="lot-form-header">
                 <div>
-                    <h1>{mode === "edit" ? "Editar lote" : "Novo lote"}</h1>
+                    <h1>{mode === "edit" ? t("loteForm.editTitle") : t("loteForm.newTitle")}</h1>
                 </div>
                 <div className="lot-form-actions">
-                    <button type="button" className="btn secondary" onClick={() => navigate("/lotes")}>
-                        Cancelar
+                    <button
+                        type="button"
+                        className="btn secondary"
+                        onClick={() => navigate(ROTAS_LOTES.cadastro.lista)}
+                    >
+                        {t("cancel")}
                     </button>
                     <button type="button" className="btn" onClick={handleSave}>
-                        {t("save") || "Salvar"}
+                        {t("save")}
                     </button>
                 </div>
             </div>
@@ -181,24 +186,24 @@ export default function LoteForm({ mode = "create", lotId }) {
             {toast ? <div className="toast">{toast}</div> : null}
 
             <div className="card">
-                <h2>Informações básicas</h2>
+                <h2>{t("loteForm.basicInfo")}</h2>
                 <div className="grid-2">
                     <div className="field">
-                        <label>Código interno</label>
+                        <label>{t("loteForm.internalCodeShort")}</label>
                         <input value={lot.internalCode} onChange={(e) => setField("internalCode", e.target.value)} />
                         {errors.internalCode ? <span className="error">{errors.internalCode}</span> : null}
                     </div>
 
                     <div className="field">
-                        <label>Nome do lote</label>
+                        <label>{t("lotName")}</label>
                         <input value={lot.lotName} onChange={(e) => setField("lotName", e.target.value)} />
                         {errors.lotName ? <span className="error">{errors.lotName}</span> : null}
                     </div>
 
                     <div className="field">
-                        <label>Região / origem</label>
+                        <label>{t("loteForm.regionOrigin")}</label>
                         <select value={lot.region} onChange={(e) => setField("region", e.target.value)}>
-                            <option value="">Selecione</option>
+                            <option value="">{t("select")}</option>
                             {REGIONS.map((item) => (
                                 <option key={item} value={item}>
                                     {item}
@@ -209,7 +214,7 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Nota SCA</label>
+                        <label>{t("loteForm.scaScore")}</label>
                         <input
                             type="number"
                             step="0.1"
@@ -221,13 +226,13 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Armazém de origem</label>
+                        <label>{t("originWarehouse")}</label>
                         <input value={lot.originWarehouse} onChange={(e) => setField("originWarehouse", e.target.value)} />
                         {errors.originWarehouse ? <span className="error">{errors.originWarehouse}</span> : null}
                     </div>
 
                     <div className="field">
-                        <label>Armazém disponível</label>
+                        <label>{t("availableWarehouse")}</label>
                         <input value={lot.availableWarehouse} onChange={(e) => setField("availableWarehouse", e.target.value)} />
                         {errors.availableWarehouse ? <span className="error">{errors.availableWarehouse}</span> : null}
                     </div>
@@ -235,18 +240,18 @@ export default function LoteForm({ mode = "create", lotId }) {
             </div>
 
             <div className="card">
-                <h2>Oferta comercial</h2>
+                <h2>{t("loteForm.commercialOffer")}</h2>
                 <div className="grid-2">
                     <div className="field">
-                        <label>Modo de venda</label>
+                        <label>{t("loteForm.salesModeLabel")}</label>
                         <select value={lot.offer.salesMode} onChange={(e) => setField("offer.salesMode", e.target.value)}>
-                            <option value="sack">Por saca</option>
-                            <option value="container">Contêiner</option>
+                            <option value="sack">{t("salesModeSack")}</option>
+                            <option value="container">{t("loteForm.container")}</option>
                         </select>
                     </div>
 
                     <div className="field">
-                        <label>Embalagem</label>
+                        <label>{t("packaging")}</label>
                         <select value={lot.packaging.type} onChange={(e) => setField("packaging.type", e.target.value)}>
                             {PACKAGING_TYPES.map((item) => (
                                 <option key={item} value={item}>
@@ -258,7 +263,7 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Moeda</label>
+                        <label>{t("currency")}</label>
                         <select value={lot.offer.currency} onChange={(e) => setField("offer.currency", e.target.value)}>
                             {CURRENCIES.map((item) => (
                                 <option key={item} value={item}>
@@ -269,7 +274,7 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Quantidade mínima</label>
+                        <label>{t("quantityMin")}</label>
                         <input
                             type="number"
                             min="1"
@@ -280,7 +285,7 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Quantidade disponível</label>
+                        <label>{t("quantityAvailable")}</label>
                         <input
                             type="number"
                             min="1"
@@ -291,7 +296,7 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Preço por saca</label>
+                        <label>{t("detalheLote.pricePerSack")}</label>
                         <input
                             type="number"
                             min="0"
@@ -303,9 +308,9 @@ export default function LoteForm({ mode = "create", lotId }) {
                     </div>
 
                     <div className="field">
-                        <label>Mês de embarque</label>
+                        <label>{t("shipMonth")}</label>
                         <select value={lot.offer.ship.shipMonth} onChange={(e) => setField("offer.ship.shipMonth", e.target.value)}>
-                            <option value="">Selecione</option>
+                            <option value="">{t("select")}</option>
                             {SHIP_MONTHS.map((item) => (
                                 <option key={item} value={item}>
                                     {item}
@@ -318,10 +323,10 @@ export default function LoteForm({ mode = "create", lotId }) {
             </div>
 
             <div className="card">
-                <h2>Descrição</h2>
+                <h2>{t("sectionDescription")}</h2>
                 <div className="grid-1">
                     <div className="field">
-                        <label>Descrição em português</label>
+                        <label>{t("loteForm.descriptionPt")}</label>
                         <textarea
                             rows="5"
                             value={lot.description.pt}

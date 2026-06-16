@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "../../../i18n/i18n";
 import "../FormCadastro.css";
 import { salvarCliente } from "./clientesStorage";
 
@@ -43,6 +44,7 @@ function mascaraCep(valor) {
 
 export default function NovoCliente() {
     const navigate = useNavigate();
+    const { t } = useI18n();
 
     const [cliente, setCliente] = useState({
         nomeRazaoSocial: "",
@@ -94,37 +96,37 @@ export default function NovoCliente() {
 
     function validarCliente() {
         if (!cliente.nomeRazaoSocial.trim()) {
-            alert("Informe o Nome / Razão Social.");
+            alert(t("clientes.errName"));
             return false;
         }
 
         if (!cliente.documento.trim()) {
-            alert("Informe o CPF/CNPJ.");
+            alert(t("clientes.errDocument"));
             return false;
         }
 
         if (!cliente.email.trim()) {
-            alert("Informe o E-mail.");
+            alert(t("clientes.errEmail"));
             return false;
         }
 
         if (!cliente.telefone.trim()) {
-            alert("Informe o Telefone / WhatsApp.");
+            alert(t("clientes.errPhone"));
             return false;
         }
 
         if (!cliente.tipoCliente.trim()) {
-            alert("Informe o Tipo de Cliente.");
+            alert(t("clientes.errType"));
             return false;
         }
 
         if (!cliente.nomeContato.trim()) {
-            alert("Informe o Nome do Contato.");
+            alert(t("clientes.errContactName"));
             return false;
         }
 
         if (!cliente.emailContato.trim()) {
-            alert("Informe o E-mail do Contato.");
+            alert(t("clientes.errContactEmail"));
             return false;
         }
 
@@ -139,7 +141,7 @@ export default function NovoCliente() {
 
         salvarCliente(cliente);
 
-        alert("Cliente salvo com sucesso!");
+        alert(t("clientes.saved"));
 
         navigate("/cadastros/clientes");
     }
@@ -148,8 +150,8 @@ export default function NovoCliente() {
         <section>
             <div className="page-header">
                 <div>
-                    <h1>Novo cliente</h1>
-                    <p>Cadastre as principais informações do comprador.</p>
+                    <h1>{t("clientes.novoTitle")}</h1>
+                    <p>{t("clientes.novoSubtitle")}</p>
                 </div>
 
                 <div className="actions">
@@ -158,21 +160,21 @@ export default function NovoCliente() {
                         className="btn-secondary"
                         onClick={() => navigate("/cadastros/clientes")}
                     >
-                        Cancelar
+                        {t("cancel")}
                     </button>
 
                     <button type="button" className="btn-primary" onClick={handleSalvar}>
-                        Salvar
+                        {t("save")}
                     </button>
                 </div>
             </div>
 
             <div className="form-card">
-                <h2>Informações básicas</h2>
+                <h2>{t("clientes.basicInfo")}</h2>
 
                 <div className="form-grid">
                     <label>
-                        Nome / Razão social
+                        {t("clientes.name")}
                         <input
                             type="text"
                             value={cliente.nomeRazaoSocial}
@@ -182,15 +184,15 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        Tipo
+                        {t("clientes.type")}
                         <select value={cliente.tipoPessoa} onChange={handleTipoPessoaChange}>
-                            <option value="PF">Pessoa Física</option>
-                            <option value="PJ">Pessoa Jurídica</option>
+                            <option value="PF">{t("clientes.pf")}</option>
+                            <option value="PJ">{t("clientes.pj")}</option>
                         </select>
                     </label>
 
                     <label>
-                        {cliente.tipoPessoa === "PF" ? "CPF" : "CNPJ"}
+                        {cliente.tipoPessoa === "PF" ? t("clientes.cpf") : t("clientes.cnpj")}
                         <input
                             type="text"
                             value={cliente.documento}
@@ -209,7 +211,7 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        E-mail
+                        {t("clientes.email")}
                         <input
                             type="email"
                             value={cliente.email}
@@ -219,7 +221,7 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        Telefone / WhatsApp
+                        {t("clientes.phone")}
                         <input
                             type="text"
                             value={cliente.telefone}
@@ -231,24 +233,24 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        Status
+                        {t("clientes.status")}
                         <select
                             value={cliente.status}
                             onChange={(e) => alterarCampo("status", e.target.value)}
                         >
-                            <option>Ativo</option>
-                            <option>Inativo</option>
+                            <option>{t("clientes.active")}</option>
+                            <option>{t("clientes.inactive")}</option>
                         </select>
                     </label>
                 </div>
             </div>
 
             <div className="form-card">
-                <h2>Endereço</h2>
+                <h2>{t("clientes.address")}</h2>
 
                 <div className="form-grid">
                     <label>
-                        País
+                        {t("clientes.country")}
                         <select
                             value={cliente.pais}
                             onChange={(e) => alterarCampo("pais", e.target.value)}
@@ -264,7 +266,7 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        Estado
+                        {t("clientes.state")}
                         <input
                             type="text"
                             value={cliente.estado}
@@ -274,7 +276,7 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        Cidade
+                        {t("clientes.city")}
                         <input
                             type="text"
                             value={cliente.cidade}
@@ -407,7 +409,7 @@ export default function NovoCliente() {
             </div>
 
             <div className="form-card">
-                <h2>Contato principal</h2>
+                <h2>{t("clientes.contact")}</h2>
 
                 <div className="form-grid">
                     <label>
@@ -445,7 +447,7 @@ export default function NovoCliente() {
                     </label>
 
                     <label>
-                        E-mail
+                        {t("clientes.contactEmail")}
                         <input
                             type="email"
                             value={cliente.emailContato}
@@ -456,7 +458,7 @@ export default function NovoCliente() {
             </div>
 
             <div className="form-card">
-                <h2>Observações</h2>
+                <h2>{t("clientes.notes")}</h2>
 
                 <label>
                     Observações internas

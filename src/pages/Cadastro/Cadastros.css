@@ -86,6 +86,29 @@
     margin: 0;
 }
 
+.cadastro-card--soon {
+    cursor: default;
+    opacity: 0.72;
+    background: #faf7f3;
+}
+
+.cadastro-card--soon:hover {
+    transform: none;
+    border-color: #eadfd5;
+    box-shadow: 0 12px 28px rgba(84, 49, 28, 0.07);
+}
+
+.cadastro-soon-badge {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f2e8df;
+    color: #7a6658;
+}
+
 .card-footer {
     margin-top: 24px;
     padding-top: 18px;

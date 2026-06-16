@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useI18n } from "../../../i18n/i18n";
 import "../FormCadastro.css";
 import {
     buscarClientePorId,
@@ -45,6 +46,7 @@ function mascaraCep(valor) {
 export default function EditarCliente() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { t } = useI18n();
 
     const [cliente, setCliente] = useState(null);
 
@@ -97,7 +99,7 @@ export default function EditarCliente() {
         <section>
             <div className="page-header">
                 <div>
-                    <h1>Editar cliente</h1>
+                    <h1>{t("clientes.editarTitle")}</h1>
                     <p>Atualize as informações cadastrais do comprador.</p>
                 </div>
 
@@ -107,17 +109,17 @@ export default function EditarCliente() {
                         className="btn-secondary"
                         onClick={() => navigate("/cadastros/clientes")}
                     >
-                        Cancelar
+                        {t("cancel")}
                     </button>
 
                     <button type="button" className="btn-primary" onClick={handleSalvar}>
-                        Salvar
+                        {t("save")}
                     </button>
                 </div>
             </div>
 
             <div className="form-card">
-                <h2>Informações básicas</h2>
+                <h2>{t("clientes.basicInfo")}</h2>
 
                 <div className="form-grid">
                     <label>

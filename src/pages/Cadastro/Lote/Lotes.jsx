@@ -1,5 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useI18n } from "../../../i18n/i18n.jsx";
+import { useAuth } from "../../../auth/AuthContext";
+import { PERMISSOES } from "../../../auth/AuthContext";
+import { obterRotasLotes } from "../../../auth/routes";
 import { loadLots, upsertLot } from "../../../lib/storage.js";
 
 function duplicateLot(lot) {
@@ -15,23 +18,32 @@ function duplicateLot(lot) {
 
 export default function Lotes() {
   const { t } = useI18n();
+  const { temPermissao } = useAuth();
+  const location = useLocation();
+  const rotas = obterRotasLotes(location.pathname);
   const lots = loadLots();
+  const podeCriar = temPermissao(PERMISSOES.NOVO_LOTE) && rotas.novo;
+  const podeEditar = temPermissao(PERMISSOES.NOVO_LOTE) && rotas.editar;
 
   return (
     <div className="card">
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <div>
           <h2 style={{ margin: 0 }}>{t("lots")}</h2>
-          <div className="muted">{lots.length} {lots.length === 1 ? "lote" : "lotes"}</div>
+          <div className="muted">{lots.length === 1 ? t("oneLot") : t("lotsCount", { count: lots.length })}</div>
         </div>
 
-        <Link to="/lotes/novo" className="btn-link">+ {t("newLot")}</Link>
+        {podeCriar && (
+          <Link to={rotas.novo} className="btn-link">+ {t("newLot")}</Link>
+        )}
       </div>
 
       {lots.length === 0 ? (
         <div style={{ marginTop: 16 }}>
           <p className="muted">{t("emptyLots")}</p>
-          <Link to="/lotes/novo" className="btn-link">{t("createFirstLot")}</Link>
+          {podeCriar && (
+            <Link to={rotas.novo} className="btn-link">{t("createFirstLot")}</Link>
+          )}
         </div>
       ) : (
         <div style={{ marginTop: 16, overflowX: "auto" }}>
@@ -57,24 +69,33 @@ export default function Lotes() {
                     </div>
                   </td>
                   <td>{lot.region || "-"}</td>
-                      <td>{lot.packaging?.type || "-"}</td>
+                  <td>{lot.packaging?.type || "-"}</td>
                   <td>
                     <div className="muted" style={{ fontSize: 13 }}>
-                      {lot.offer?.spot ? "Spot" : ""}
-                      {lot.offer?.ship?.enabled ? ` • Embarque: ${lot.offer.ship.shipMonth || "-"} • NY: ${lot.offer.ship.nyMonth || "-"}` : ""}
+                      {lot.offer?.spot ? t("spot") : ""}
+                      {lot.offer?.ship?.enabled
+                        ? t("detalheLote.shipInfo", {
+                            ship: lot.offer.ship.shipMonth || "-",
+                            ny: lot.offer.ship.nyMonth || "-",
+                          })
+                        : ""}
                     </div>
                   </td>
                   <td style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <Link to={`/lotes/${lot.id}`} className="btn-link">{t("view")}</Link>
-                    <Link to={`/lotes/${lot.id}/editar`} className="btn-link">{t("edit")}</Link>
-                    <button
-                      type="button"
-                      className="btn-link"
-                      onClick={() => duplicateLot(lot)}
-                      style={{ border: 0, cursor: "pointer" }}
-                    >
-                      {t("duplicate")}
-                    </button>
+                    <Link to={rotas.detalhe(lot.id)} className="btn-link">{t("view")}</Link>
+                    {podeEditar && (
+                      <Link to={rotas.editar(lot.id)} className="btn-link">{t("edit")}</Link>
+                    )}
+                    {podeCriar && (
+                      <button
+                        type="button"
+                        className="btn-link"
+                        onClick={() => duplicateLot(lot)}
+                        style={{ border: 0, cursor: "pointer" }}
+                      >
+                        {t("duplicate")}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

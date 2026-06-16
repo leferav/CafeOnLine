@@ -1,10 +1,16 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import Login from "./pages/Login.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute";
-import { PERMISSOES } from "./auth/AuthContext";
+import { useAuth } from "./auth/AuthContext";
+import {
+  LEGACY_REDIRECTS,
+  ROUTE_PAGES,
+  obterPrimeiraRotaAcessivel,
+} from "./auth/routes";
 
 import Home from "./pages/Home.jsx";
+import SemAcesso from "./pages/SemAcesso.jsx";
 import Compras from "./pages/Compras";
 import ProsseguirCompra from "./pages/ProsseguirCompra.jsx";
 import Negociacoes from "./pages/Negociacoes.jsx";
@@ -19,6 +25,22 @@ import Clientes from "./pages/Cadastro/Cliente/Clientes.jsx";
 import NovoCliente from "./pages/Cadastro/Cliente/NovoCliente.jsx";
 import EditarCliente from "./pages/Cadastro/Cliente/EditarCliente.jsx";
 
+const PAGE_COMPONENTS = {
+  Home,
+  SemAcesso,
+  Cadastros,
+  Lotes,
+  NovoLote,
+  EditarLote,
+  DetalheLote,
+  Clientes,
+  NovoCliente,
+  EditarCliente,
+  Negociacoes,
+  Compras,
+  ProsseguirCompra,
+};
+
 function LayoutProtegido({ children, permissao }) {
   return (
     <ProtectedRoute permissao={permissao}>
@@ -28,143 +50,58 @@ function LayoutProtegido({ children, permissao }) {
   );
 }
 
+function RedirectFallback() {
+  const { authenticated, temPermissao } = useAuth();
+
+  if (!authenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Navigate to={obterPrimeiraRotaAcessivel(temPermissao)} replace />;
+}
+
+function RedirectLegacyLoteDetalhe() {
+  const { id } = useParams();
+  return <Navigate to={`/comprar-cafe/${id}`} replace />;
+}
+
+function RedirectLegacyLoteEditar() {
+  const { id } = useParams();
+  return <Navigate to={`/cadastros/lotes/${id}/editar`} replace />;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
 
-      <Route
-        path="/"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.DASHBOARD}>
-            <Home />
-          </LayoutProtegido>
-        }
-      />
+      {ROUTE_PAGES.map((route) => {
+        const Component = PAGE_COMPONENTS[route.component];
+        return (
+          <Route
+            key={route.id}
+            path={route.path}
+            element={
+              <LayoutProtegido permissao={route.permissao}>
+                <Component />
+              </LayoutProtegido>
+            }
+          />
+        );
+      })}
 
-      <Route
-        path="/cadastros"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.CADASTROS}>
-            <Cadastros />
-          </LayoutProtegido>
-        }
-      />
+      {LEGACY_REDIRECTS.map((redirect) => (
+        <Route
+          key={redirect.path}
+          path={redirect.path}
+          element={<Navigate to={redirect.to} replace />}
+        />
+      ))}
 
-      <Route
-        path="/cadastros/lotes"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.CADASTROS}>
-            <Lotes />
-          </LayoutProtegido>
-        }
-      />
+      <Route path="/lotes/:id/editar" element={<RedirectLegacyLoteEditar />} />
+      <Route path="/lotes/:id" element={<RedirectLegacyLoteDetalhe />} />
 
-      <Route
-        path="/comprar-cafe"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.COMPRAS}>
-            <Lotes />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/cadastros/lotes/novo"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.NOVO_LOTE}>
-            <NovoLote />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/cadastros/lotes/:id"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.CADASTROS}>
-            <DetalheLote />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/comprar-cafe/:id"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.COMPRAS}>
-            <DetalheLote />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/cadastros/lotes/:id/editar"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.NOVO_LOTE}>
-            <EditarLote />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/cadastros/clientes"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.CLIENTES}>
-            <Clientes />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/cadastros/clientes/novo"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.CLIENTES}>
-            <NovoCliente />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/cadastros/clientes/:id/editar"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.CLIENTES}>
-            <EditarCliente />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route path="/vendas" element={<Navigate to="/compras" replace />} />
-
-      <Route
-        path="/negociacoes"
-        element={
-          <LayoutProtegido permissao={[PERMISSOES.COMPRAS, PERMISSOES.VENDAS]}>
-            <Negociacoes />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/compras"
-        element={
-          <LayoutProtegido permissao={[PERMISSOES.COMPRAS, PERMISSOES.VENDAS]}>
-            <Compras />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route
-        path="/compras/:id/prosseguir"
-        element={
-          <LayoutProtegido permissao={PERMISSOES.COMPRAS}>
-            <ProsseguirCompra />
-          </LayoutProtegido>
-        }
-      />
-
-      <Route path="/lotes" element={<Navigate to="/comprar-cafe" replace />} />
-      <Route path="/lotes/novo" element={<Navigate to="/cadastros/lotes/novo" replace />} />
-
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<RedirectFallback />} />
     </Routes>
   );
 }
