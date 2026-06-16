@@ -2,26 +2,21 @@ import { Link, useLocation } from "react-router-dom";
 import { useI18n } from "../../../i18n/i18n.jsx";
 import { useAuth } from "../../../auth/AuthContext";
 import { PERMISSOES } from "../../../auth/AuthContext";
-import { obterRotasLotes } from "../../../auth/routes";
-import { loadLots, upsertLot } from "../../../lib/storage.js";
-
-function duplicateLot(lot) {
-  const copy = {
-    ...lot,
-    id: crypto.randomUUID(),
-    internalCode: (lot.internalCode || "LOTE") + "-COPIA",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  upsertLot(copy);
-}
+import { obterContextoLotes, obterRotasLotes } from "../../../auth/routes";
+import {
+  loadLots,
+  loadLotsDisponiveisParaCompra,
+  LOTE_STATUS,
+  normalizarStatusLote,
+} from "../../../lib/storage.js";
 
 export default function Lotes() {
   const { t } = useI18n();
   const { temPermissao } = useAuth();
   const location = useLocation();
   const rotas = obterRotasLotes(location.pathname);
-  const lots = loadLots();
+  const isCompra = obterContextoLotes(location.pathname) === "compra";
+  const lots = isCompra ? loadLotsDisponiveisParaCompra() : loadLots();
   const podeCriar = temPermissao(PERMISSOES.NOVO_LOTE) && rotas.novo;
   const podeEditar = temPermissao(PERMISSOES.NOVO_LOTE) && rotas.editar;
 
@@ -34,7 +29,7 @@ export default function Lotes() {
         </div>
 
         {podeCriar && (
-          <Link to={rotas.novo} className="btn-link">+ {t("newLot")}</Link>
+          <Link to={rotas.novo} className="btn-primary">+ {t("newLot")}</Link>
         )}
       </div>
 
@@ -42,7 +37,7 @@ export default function Lotes() {
         <div style={{ marginTop: 16 }}>
           <p className="muted">{t("emptyLots")}</p>
           {podeCriar && (
-            <Link to={rotas.novo} className="btn-link">{t("createFirstLot")}</Link>
+            <Link to={rotas.novo} className="btn-primary">{t("createFirstLot")}</Link>
           )}
         </div>
       ) : (
@@ -55,6 +50,7 @@ export default function Lotes() {
                 <th>{t("region")}</th>
                 <th>{t("packaging")}</th>
                 <th>{t("sectionOffer")}</th>
+                {!isCompra && <th>{t("loteStatus.column")}</th>}
                 <th>{t("actions")}</th>
               </tr>
             </thead>
@@ -81,20 +77,17 @@ export default function Lotes() {
                         : ""}
                     </div>
                   </td>
-                  <td style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <Link to={rotas.detalhe(lot.id)} className="btn-link">{t("view")}</Link>
+                  {!isCompra && (
+                    <td>
+                      {normalizarStatusLote(lot) === LOTE_STATUS.VENDIDO
+                        ? t("loteStatus.vendido")
+                        : t("loteStatus.disponivel")}
+                    </td>
+                  )}
+                  <td className="table-actions">
+                    <Link to={rotas.detalhe(lot.id)} className="btn-secondary btn-sm">{t("view")}</Link>
                     {podeEditar && (
-                      <Link to={rotas.editar(lot.id)} className="btn-link">{t("edit")}</Link>
-                    )}
-                    {podeCriar && (
-                      <button
-                        type="button"
-                        className="btn-link"
-                        onClick={() => duplicateLot(lot)}
-                        style={{ border: 0, cursor: "pointer" }}
-                      >
-                        {t("duplicate")}
-                      </button>
+                      <Link to={rotas.editar(lot.id)} className="btn-outline btn-sm">{t("edit")}</Link>
                     )}
                   </td>
                 </tr>

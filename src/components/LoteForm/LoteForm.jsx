@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./LoteForm.css";
 
 import { useI18n } from "../../i18n/i18n";
-import { getLotById, upsertLot } from "../../lib/storage";
+import { getLotById, LOTE_STATUS, upsertLot } from "../../lib/storage";
 import { ROTAS_LOTES } from "../../auth/routes";
 
 const REGIONS = [
@@ -67,6 +67,7 @@ function createEmptyLot() {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        status: LOTE_STATUS.DISPONIVEL,
     };
 }
 
@@ -172,12 +173,12 @@ export default function LoteForm({ mode = "create", lotId }) {
                 <div className="lot-form-actions">
                     <button
                         type="button"
-                        className="btn secondary"
+                        className="btn-secondary"
                         onClick={() => navigate(ROTAS_LOTES.cadastro.lista)}
                     >
                         {t("cancel")}
                     </button>
-                    <button type="button" className="btn" onClick={handleSave}>
+                    <button type="button" className="btn-primary" onClick={handleSave}>
                         {t("save")}
                     </button>
                 </div>

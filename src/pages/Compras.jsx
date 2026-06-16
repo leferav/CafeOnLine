@@ -1,22 +1,42 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ROTAS_LOTES } from "../auth/routes";
+import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/i18n";
-import { loadLots } from "../lib/storage";
+import { loadLotsDisponiveisParaCompra } from "../lib/storage";
+import {
+  COMPRA_STATUS,
+  calcularTotaisCompra,
+  consolidarItensCompra,
+  montarLinkProsseguir,
+  salvarCompra,
+} from "../lib/comprasStorage";
 
-function buildInitialItems(type, lotId, lots) {
-  if (!lotId) return [];
-  const selected = lots.find((lot) => lot.id === lotId);
-  if (!selected) return [];
-  const available = Number(selected.offer?.quantityAvailable || 0);
-  const min = Number(selected.offer?.quantityMin || 1);
-  return [{ lotId: selected.id, quantity: type === "full" ? available : min }];
+function getLotQuantities(lot) {
+  const available = Number(lot?.offer?.quantityAvailable || 0);
+  const min = Number(lot.offer?.quantityMin || 1);
+  return { available, min };
 }
 
-function salvarCompraLocal(compra) {
-  const compras = JSON.parse(localStorage.getItem("comprasCafeOnline") || "[]");
-  const atualizadas = [compra, ...compras.filter((item) => item.id !== compra.id)];
-  localStorage.setItem("comprasCafeOnline", JSON.stringify(atualizadas));
+function quantityForPurchaseType(purchaseType, lot) {
+  const { available, min } = getLotQuantities(lot);
+  return purchaseType === "full" ? available : min;
+}
+
+function buildInitialItems(type, lotId, lots) {
+  const selectedLotId = lotId || lots[0]?.id;
+  if (!selectedLotId) return [];
+  const selected = lots.find((lot) => lot.id === selectedLotId);
+  if (!selected) return [];
+  return [{ lotId: selected.id, quantity: quantityForPurchaseType(type, selected) }];
+}
+
+function mapItemsForPurchaseType(items, purchaseType, lots) {
+  return items.map((item) => {
+    const lot = lots.find((entry) => entry.id === item.lotId);
+    if (!lot) return item;
+    return { ...item, quantity: quantityForPurchaseType(purchaseType, lot) };
+  });
 }
 
 function montarCorpoEmail(compra) {
@@ -43,8 +63,10 @@ ${itensTexto}
 
 Total geral: ${compra.currency} ${compra.total.toFixed(2)}
 
-Para prosseguir com a compra, acesse:
+Para aceitar ou recusar pelo sistema, acesse:
 ${compra.linkProsseguir}
+
+Você também pode validar o aceite diretamente em Negociações no portal.
 
 Atenciosamente,
 Café Online`;
@@ -52,25 +74,97 @@ Café Online`;
 
 export default function Compras() {
   const { t } = useI18n();
-  const lots = loadLots();
+  const { usuario } = useAuth();
+  const lots = loadLotsDisponiveisParaCompra();
   const [searchParams] = useSearchParams();
   const preselectedLotId = searchParams.get("lotId") || "";
   const [purchaseType, setPurchaseType] = useState("partial");
   const [items, setItems] = useState(() => buildInitialItems("partial", preselectedLotId, lots));
+  const [solicitacaoEnviada, setSolicitacaoEnviada] = useState(false);
+  const [ultimaCompraId, setUltimaCompraId] = useState(null);
+
+  const quantityErrors = useMemo(() => {
+    if (purchaseType === "full") return {};
+
+    const totalsByLot = {};
+    items.forEach((item) => {
+      totalsByLot[item.lotId] = (totalsByLot[item.lotId] || 0) + Number(item.quantity || 0);
+    });
+
+    const errors = {};
+    items.forEach((item, index) => {
+      const lot = lots.find((entry) => entry.id === item.lotId);
+      if (!lot) return;
+
+      const { available, min } = getLotQuantities(lot);
+      const qty = Number(item.quantity || 0);
+      const lotLabel = lot.lotName || lot.internalCode || t("compras.lot");
+      const totalForLot = totalsByLot[item.lotId] || 0;
+
+      if (totalForLot > available) {
+        errors[index] = t("compras.errQtyExceedsAvailableTotal", {
+          available,
+          lotName: lotLabel,
+          requested: totalForLot,
+        });
+      } else if (qty < min) {
+        errors[index] = t("compras.errQtyBelowMin", { min, lotName: lotLabel });
+      }
+    });
+    return errors;
+  }, [items, lots, purchaseType, t]);
 
   function changePurchaseType(nextType) {
+    if (nextType === purchaseType) return;
+
     setPurchaseType(nextType);
-    setItems(buildInitialItems(nextType, preselectedLotId, lots));
+    setItems((prev) => {
+      const wasMultiple = purchaseType === "multiple";
+      const isSingleMode = nextType === "partial" || nextType === "full";
+
+      if (wasMultiple && isSingleMode) {
+        const lotId = preselectedLotId || lots[0]?.id;
+        return lotId ? buildInitialItems(nextType, lotId, lots) : [];
+      }
+
+      if (prev.length === 0) {
+        if (!isSingleMode) return buildInitialItems(nextType, preselectedLotId, lots);
+        const lotId = preselectedLotId || lots[0]?.id;
+        return lotId ? buildInitialItems(nextType, lotId, lots) : [];
+      }
+
+      if (isSingleMode) {
+        const lotId = prev[0]?.lotId || preselectedLotId || lots[0]?.id;
+        return lotId ? buildInitialItems(nextType, lotId, lots) : [];
+      }
+
+      return mapItemsForPurchaseType(prev, nextType, lots);
+    });
   }
 
   function addItem() {
     const firstLot = lots[0];
     if (!firstLot) return;
-    setItems((prev) => [...prev, { lotId: firstLot.id, quantity: Number(firstLot.offer?.quantityMin || 1) }]);
+    setItems((prev) => [
+      ...prev,
+      { lotId: firstLot.id, quantity: quantityForPurchaseType(purchaseType, firstLot) },
+    ]);
   }
 
   function updateItem(index, field, value) {
-    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
+    setItems((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+        if (field === "lotId") {
+          const lot = lots.find((entry) => entry.id === value);
+          return {
+            lotId: value,
+            quantity: lot ? quantityForPurchaseType(purchaseType, lot) : 1,
+          };
+        }
+        return { ...item, [field]: value };
+      })
+    );
   }
 
   function removeItem(index) {
@@ -97,38 +191,77 @@ export default function Compras() {
         producerEmail: lot.producerEmail || lot.farm?.producerEmail || "",
       };
     }).filter(Boolean);
-    const total = enriched.reduce((acc, item) => acc + item.subtotal, 0);
-    const currency = enriched[0]?.currency || "USD";
-    return { items: enriched, total, currency };
-  }, [items, lots]);
+
+    const itemsResumo =
+      purchaseType === "multiple" ? consolidarItensCompra(enriched) : enriched;
+    const { totalSacks, lotsCount, total } = calcularTotaisCompra(itemsResumo);
+    const currency = itemsResumo[0]?.currency || enriched[0]?.currency || "USD";
+
+    return { items: itemsResumo, total, currency, totalSacks, lotsCount };
+  }, [items, lots, purchaseType]);
 
   function solicitarCompra() {
     if (summary.items.length === 0) {
       alert(t("compras.selectLotAlert"));
       return;
     }
+    if (Object.keys(quantityErrors).length > 0) {
+      const firstError = quantityErrors[Object.keys(quantityErrors)[0]];
+      alert(firstError);
+      return;
+    }
     const compraId = crypto.randomUUID();
-    const compra = {
+    const compraBase = {
       id: compraId,
       purchaseType,
-      buyerName: "Cliente Comprador",
-      buyerEmail: "comprador@cafeonline.com",
-      status: "SOLICITADA",
+      buyerName: usuario?.nome || "Cliente Comprador",
+      buyerEmail: usuario?.email || "comprador@cafeonline.com",
+      status: COMPRA_STATUS.SOLICITADA,
       createdAt: new Date().toISOString(),
       items: summary.items,
       total: summary.total,
+      totalSacks: summary.totalSacks,
+      lotsCount: summary.lotsCount,
       currency: summary.currency,
-      linkProsseguir: `${window.location.origin}/compras/${compraId}/prosseguir`,
     };
-    salvarCompraLocal(compra);
+    const compra = {
+      ...compraBase,
+      linkProsseguir: montarLinkProsseguir(compraBase),
+    };
+    salvarCompra(compra);
+    setUltimaCompraId(compraId);
+    setSolicitacaoEnviada(true);
+
     const emailDestino = summary.items[0]?.producerEmail || "leferav@gmail.com";
-    const assunto = `Solicitação de compra - ${summary.items[0]?.internalCode || "Lote Café Online"}`;
+    const assunto =
+      summary.lotsCount > 1
+        ? `Solicitação de compra - ${summary.lotsCount} lotes (${summary.totalSacks} sacas)`
+        : `Solicitação de compra - ${summary.items[0]?.internalCode || "Lote Café Online"}`;
     const corpo = montarCorpoEmail(compra);
-    window.location.href = `mailto:${emailDestino}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+    window.open(
+      `mailto:${emailDestino}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`,
+      "_blank"
+    );
   }
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
+      {solicitacaoEnviada && ultimaCompraId && (
+        <div className="card" style={{ border: "1px solid #c9b5a5", background: "#faf6f2" }}>
+          <h3 style={{ marginTop: 0 }}>{t("compras.requestSuccessTitle")}</h3>
+          <p className="muted" style={{ marginBottom: 12 }}>{t("compras.requestSuccessText")}</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link className="btn-secondary" to="/negociacoes">{t("compras.goNegociacoes")}</Link>
+            <Link className="btn-outline" to={`/negociacoes?compra=${ultimaCompraId}`}>
+              {t("compras.goProsseguir")}
+            </Link>
+          </div>
+          <p className="muted" style={{ margin: "12px 0 0", fontSize: 13 }}>
+            {t("compras.emailAlsoSent")}
+          </p>
+        </div>
+      )}
+
       <div className="card">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <div>
@@ -136,21 +269,33 @@ export default function Compras() {
             <div className="muted">{t("compras.subtitle")}</div>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Link className="btn-link" to={ROTAS_LOTES.compra.lista}>{t("compras.backLots")}</Link>
+            <Link className="btn-secondary" to={ROTAS_LOTES.compra.lista}>{t("compras.backLots")}</Link>
           </div>
         </div>
       </div>
 
       <div className="card">
         <h3 style={{ marginTop: 0 }}>{t("compras.typeTitle")}</h3>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button type="button" className="btn-link" onClick={() => changePurchaseType("partial")} style={{ opacity: purchaseType === "partial" ? 1 : 0.75 }}>
+        <div className="btn-toggle-group">
+          <button
+            type="button"
+            className={`btn-toggle ${purchaseType === "partial" ? "is-active" : ""}`}
+            onClick={() => changePurchaseType("partial")}
+          >
             {t("compras.partial")}
           </button>
-          <button type="button" className="btn-link" onClick={() => changePurchaseType("full")} style={{ opacity: purchaseType === "full" ? 1 : 0.75 }}>
+          <button
+            type="button"
+            className={`btn-toggle ${purchaseType === "full" ? "is-active" : ""}`}
+            onClick={() => changePurchaseType("full")}
+          >
             {t("compras.full")}
           </button>
-          <button type="button" className="btn-link" onClick={() => changePurchaseType("multiple")} style={{ opacity: purchaseType === "multiple" ? 1 : 0.75 }}>
+          <button
+            type="button"
+            className={`btn-toggle ${purchaseType === "multiple" ? "is-active" : ""}`}
+            onClick={() => changePurchaseType("multiple")}
+          >
             {t("compras.multiple")}
           </button>
         </div>
@@ -160,7 +305,7 @@ export default function Compras() {
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
           <h3 style={{ margin: 0 }}>{t("compras.itemsTitle")}</h3>
           {purchaseType === "multiple" && (
-            <button type="button" className="btn-link" onClick={addItem}>{t("compras.addLot")}</button>
+            <button type="button" className="btn-outline btn-sm" onClick={addItem}>{t("compras.addLot")}</button>
           )}
         </div>
 
@@ -169,7 +314,7 @@ export default function Compras() {
         ) : (
           <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
             {items.length === 0 && (
-              <button type="button" className="btn-link" onClick={addItem} style={{ width: "fit-content" }}>
+              <button type="button" className="btn-outline" onClick={addItem} style={{ width: "fit-content" }}>
                 {t("compras.selectLot")}
               </button>
             )}
@@ -194,15 +339,25 @@ export default function Compras() {
                         type="number"
                         min={purchaseType === "full" ? available : min}
                         max={available || undefined}
-                        value={purchaseType === "full" ? available : item.quantity}
+                        value={item.quantity}
                         disabled={purchaseType === "full"}
                         onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                        style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #d9d2cb" }}
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          borderRadius: 10,
+                          border: quantityErrors[index] ? "1px solid #c44" : "1px solid #d9d2cb",
+                        }}
                       />
+                      {quantityErrors[index] ? (
+                        <span style={{ display: "block", marginTop: 6, fontSize: 13, color: "#a33", fontWeight: 600 }}>
+                          {quantityErrors[index]}
+                        </span>
+                      ) : null}
                     </div>
                     {purchaseType === "multiple" && (
                       <div style={{ alignSelf: "end" }}>
-                        <button type="button" className="btn-link" onClick={() => removeItem(index)}>{t("remove")}</button>
+                        <button type="button" className="btn-ghost btn-sm" onClick={() => removeItem(index)}>{t("remove")}</button>
                       </div>
                     )}
                   </div>
@@ -214,6 +369,11 @@ export default function Compras() {
                       price: Number(selectedLot?.offer?.pricePerSack || 0).toFixed(2),
                     })}
                   </div>
+                  {purchaseType !== "full" && (
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#5a3e2b" }}>
+                      {t("compras.availableInLot", { available })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -244,9 +404,23 @@ export default function Compras() {
             <div style={{ marginTop: 8, fontSize: 22, fontWeight: 700 }}>
               {t("compras.grandTotal", { currency: summary.currency, total: summary.total.toFixed(2) })}
             </div>
+            {purchaseType === "multiple" && summary.items.length > 0 && (
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#5a3e2b" }}>
+                {t("compras.summaryMultiple", {
+                  lots: summary.lotsCount,
+                  sacks: summary.totalSacks,
+                })}
+              </div>
+            )}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8 }}>
-              <button type="button" className="btn-link">{t("continue")}</button>
-              <button type="button" className="btn-link" onClick={solicitarCompra}>{t("compras.requestPurchase")}</button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={solicitarCompra}
+                disabled={Object.keys(quantityErrors).length > 0}
+              >
+                {t("compras.requestPurchase")}
+              </button>
             </div>
             <p className="muted" style={{ margin: 0, fontSize: 13 }}>{t("compras.mvpNote")}</p>
           </div>

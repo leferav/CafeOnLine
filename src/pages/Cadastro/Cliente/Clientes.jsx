@@ -65,14 +65,14 @@ export default function Clientes() {
                                 <div className="table-actions">
                                     <Link
                                         to={`/cadastros/clientes/${cliente.id}/editar`}
-                                        className="btn-edit"
+                                        className="btn-outline btn-sm"
                                     >
                                         {t("clientes.edit")}
                                     </Link>
 
                                     <button
                                         type="button"
-                                        className="btn-delete"
+                                        className="btn-danger btn-sm"
                                         onClick={() => handleExcluir(cliente.id)}
                                     >
                                         🗑 {t("clientes.delete")}

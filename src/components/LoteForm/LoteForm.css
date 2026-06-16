@@ -85,20 +85,6 @@
         font-weight: 500;
     }
 
-.btn {
-    background: #5a3e2b;
-    color: #fff;
-    border: 0;
-    border-radius: 10px;
-    padding: 10px 16px;
-    cursor: pointer;
-}
-
-    .btn.secondary {
-        background: #ececec;
-        color: #222;
-    }
-
 .error {
     color: #b42318;
     font-size: 12px;
@@ -145,9 +131,8 @@
         font-size: 24px;
     }
 
-    .lot-form-actions,
-    .lot-form-actions .btn,
-    .lot-form-actions .btn-link {
+    .lot-form-actions .btn-primary,
+    .lot-form-actions .btn-secondary {
         width: 100%;
     }
 

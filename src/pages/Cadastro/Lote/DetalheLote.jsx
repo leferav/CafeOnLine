@@ -7,7 +7,7 @@ import {
   obterRotasLotes,
   ROTAS_LOTES,
 } from "../../../auth/routes";
-import { getLotById } from "../../../lib/storage.js";
+import { getLotById, isLotDisponivelParaCompra, LOTE_STATUS, normalizarStatusLote } from "../../../lib/storage.js";
 
 export default function DetalheLote() {
     const { id } = useParams();
@@ -22,7 +22,16 @@ export default function DetalheLote() {
         return (
             <div className="card">
                 <p className="muted">{t("detalheLote.notFound")}</p>
-                <Link className="btn-link" to={rotas.lista}>← {t("lots")}</Link>
+                <Link className="btn-secondary" to={rotas.lista}>← {t("lots")}</Link>
+            </div>
+        );
+    }
+
+    if (isCompra && !isLotDisponivelParaCompra(lot)) {
+        return (
+            <div className="card">
+                <p className="muted">{t("loteStatus.notAvailableAnymore")}</p>
+                <Link className="btn-secondary" to={rotas.lista}>← {t("lots")}</Link>
             </div>
         );
     }
@@ -41,7 +50,8 @@ export default function DetalheLote() {
                 : (lot.description?.pt || "");
 
     const podeEditar = !isCompra && temPermissao(PERMISSOES.NOVO_LOTE);
-    const podeComprar = temPermissao(PERMISSOES.COMPRAS);
+    const podeComprar = temPermissao(PERMISSOES.COMPRAS) && isLotDisponivelParaCompra(lot);
+    const vendido = normalizarStatusLote(lot) === LOTE_STATUS.VENDIDO;
 
     return (
         <div style={{ display: "grid", gap: 16 }}>
@@ -50,23 +60,28 @@ export default function DetalheLote() {
                     <div>
                         <h2 style={{ margin: 0 }}>{lot.lotName || "-"}</h2>
                         <div className="muted">{lot.internalCode || ""}</div>
+                        {vendido && (
+                            <div style={{ marginTop: 8, fontWeight: 700, color: "#7a421f" }}>
+                                {t("loteStatus.vendido")}
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                         {podeComprar && (
-                            <Link className="btn-link" to={`/compras?lotId=${lot.id}`}>
+                            <Link className="btn-primary" to={`/compras?lotId=${lot.id}`}>
                                 {t("detalheLote.buyLot")}
                             </Link>
                         )}
                         {podeEditar && (
                             <Link
-                                className="btn-link"
+                                className="btn-outline"
                                 to={ROTAS_LOTES.cadastro.editar(lot.id)}
                             >
                                 {t("edit")}
                             </Link>
                         )}
-                        <Link className="btn-link" to={rotas.lista}>
+                        <Link className="btn-secondary" to={rotas.lista}>
                             ← {t("lots")}
                         </Link>
                     </div>

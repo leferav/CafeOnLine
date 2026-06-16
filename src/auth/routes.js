@@ -127,7 +127,7 @@ export const ROUTE_PAGES = [
     id: "prosseguir-compra",
     path: "/compras/:id/prosseguir",
     component: "ProsseguirCompra",
-    permissao: PERMISSOES.COMPRAS,
+    permissao: PERMISSAO_NEGOCIACOES,
   },
   {
     id: "compras",
